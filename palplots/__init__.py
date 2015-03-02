@@ -1,3 +1,4 @@
-import PALplots
+import visualize
+import scripts 
 
-__all__=['PALplots']
+__all__=['palplots']
