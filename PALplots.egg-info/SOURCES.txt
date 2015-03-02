@@ -1,9 +1,0 @@
-README.txt
-setup.py
-PALplots.egg-info/PKG-INFO
-PALplots.egg-info/SOURCES.txt
-PALplots.egg-info/dependency_links.txt
-PALplots.egg-info/requires.txt
-PALplots.egg-info/top_level.txt
-palplots/__init__.py
-palplots/visualize.py
