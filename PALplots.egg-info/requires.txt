@@ -1,0 +1,6 @@
+numpy>1.0.0
+obspy
+scipy
+matplotlib
+h5py
+obspyh5
