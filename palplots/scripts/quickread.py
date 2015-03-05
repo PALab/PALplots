@@ -46,7 +46,8 @@ def main():
 
     # sort by appropriate dimension
     sorter = dimension+'_position'
-    stream.sort(keys=['theta_position'])
+    stream.sort(keys=[dimension+'_position'])
+    stream.detrend()
 
     # plot
     if plot == 'contour':
