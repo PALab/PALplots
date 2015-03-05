@@ -222,9 +222,9 @@ def fk(stream, dimension='x',colormap='gray', output='points.csv',show=True):
     plt.ylim((0,1e-6/(2*dt)))
     plt.ylabel('Frequency (MHz)')
     if dimension == 'x':
-        plt.xlabel('Spatial Frequency (1/'+str(stream[0].stats.x_unit)+'')
+        plt.xlabel('Spatial Frequency (1/'+str(stream[0].stats.x_unit)+')')
     if dimension == 'theta':
-        plt.xlabel('Spatial Frequency (1/'+str(stream[0].stats.theta_unit)+'')
+        plt.xlabel('Spatial Frequency (1/'+str(stream[0].stats.theta_unit)+')')
     fig.canvas.mpl_connect('button_press_event', pickV) # pick/remove points
     if show == True:
         plt.show()
@@ -277,7 +277,7 @@ def fkfilter(stream, spread=3, dimension='x',colormap='seismic',output='points.c
     # -------------
     # Plot F-K data
     # -------------
-    stream_fft, dimension = fk(stream)
+    fig, ax, stream_fft, dimension = fk(stream,dimension=dimension)
     nx = len(stream)
     nt = stream[0].stats.npts
     nk = 2*nx
@@ -348,7 +348,7 @@ def fkfilter(stream, spread=3, dimension='x',colormap='seismic',output='points.c
         filtered_stream.append(trace)
         
     # show filtered data
-    fig, ax = contour(filtered_stream,colormap=colormap, show=show)
+    fig, ax, cbar = contour(filtered_stream,dimension=dimension,colormap=colormap, show=show)
 
     return fig, ax, filtered_stream, H
 
