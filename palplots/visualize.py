@@ -13,7 +13,7 @@ import scipy.signal
     
          from obspy.core import read
          from obspy import Stream
-         from PALplots import wiggle, contour, fk, fkfilter, removeDelay
+         from PALplots import wiggle contour, fk, fkfilter, removeDelay
     
          stream = read('PA_2.h5', format='H5', apply_calib=True)
          stream = removeDelay(stream)
@@ -25,7 +25,7 @@ import scipy.signal
     @author: Jami Johnson
 '''   
 
-def wiggle(stream, dimension='x', dx = 1, percent=100, output='points.csv'):
+def wiggle(stream, dimension='x', dx = 1, percent=100, output='points.csv',show=True):
     '''
     Creates plot of traces ("wiggles") vs. x-position from an ObsPy stream produced by PLACE.  
     The positive peaks of each wiggle are filled.
@@ -34,6 +34,7 @@ def wiggle(stream, dimension='x', dx = 1, percent=100, output='points.csv'):
          dx : spacing between wiggles.  For example, dx = 10 will plot every tenth trace 
          percent : percent of maximum amplitude for each trace.  A value of 100 plots the full amplitude of the (normalized) traces, a value of 50 clips data with an amplitude greater than 50% of the maximum amplitude in the trace. 
          output : name of file to save 'picked' points to. Saves by default to 'points.csv'
+    Returns fig and ax to manipulate plot.
     '''
 
     global px,py,ax
@@ -100,7 +101,8 @@ def wiggle(stream, dimension='x', dx = 1, percent=100, output='points.csv'):
     plt.ylim((trace.stats.npts*trace.stats.delta*1e6,0))
     plt.ylabel('Time ($\mu$s)')
     fig.canvas.mpl_connect('button_press_event', picker) # select/remove point
-    plt.show()
+    if show == True:
+        plt.show()
     
     # ---------------------------
     # Write picked points to file
@@ -111,15 +113,16 @@ def wiggle(stream, dimension='x', dx = 1, percent=100, output='points.csv'):
             outfile.writerow(px)
             outfile.writerow(py)
 
-    return fig
+    return fig, ax
 
-def contour(stream, dimension='x',output='points.csv', colormap='seismic'):
+def contour(stream, dimension='x',output='points.csv', colormap='seismic',show=True):
     '''
     Creates 2D image of stream data produced by PLACE.  
     Parameters: 
          stream : ObsPy stream created with custom header information by PLACE.  Required header information: delta, npts, position, position_unit
          colormap : choose colorscheme to display data (e.g. 'jet', 'gray', 'seismic')
          output : name of file to save 'picked' points to. Saves by default to 'points.csv'
+    Returns figure, axes, and colorbar.
     '''
 
     global px,py,ax
@@ -157,7 +160,8 @@ def contour(stream, dimension='x',output='points.csv', colormap='seismic'):
     
     plt.ylabel('Time ($\mu$s)')
     fig.canvas.mpl_connect('button_press_event', picker) # pick point
-    plt.show()
+    if show == True:
+        plt.show()
 
     # ---------------------------
     # Write picked points to file
@@ -168,9 +172,9 @@ def contour(stream, dimension='x',output='points.csv', colormap='seismic'):
             outfile.writerow(px)
             outfile.writerow(py)
     
-    return fig
+    return fig, ax, cbar
 
-def fk(stream, dimension='x',colormap='gray', output='points.csv'):
+def fk(stream, dimension='x',colormap='gray', output='points.csv',show=True):
     '''
     Plots frequency-wavenumber spectrum for stream recorded by PLACE Scan.py.
     Parameters:
@@ -178,7 +182,7 @@ def fk(stream, dimension='x',colormap='gray', output='points.csv'):
          output : filename that selected velocity points are saved to.
     Use left-click to select points.  Each point defines a line with the origin with a slope corresponding to an apparent velocity.  This velocity is displayed when point is chosen.
     To remove a point, right click.
-    Returns FFT data and spatial dimension used ('x' or 'theta')
+    Returns figure and axes (to manipulate plots), FFT data and spatial dimension used ('x' or 'theta')
     '''
 
     global px, py, ax
@@ -222,7 +226,8 @@ def fk(stream, dimension='x',colormap='gray', output='points.csv'):
     if dimension == 'theta':
         plt.xlabel('Spatial Frequency (1/'+str(stream[0].stats.theta_unit)+'')
     fig.canvas.mpl_connect('button_press_event', pickV) # pick/remove points
-    plt.show()
+    if show == True:
+        plt.show()
 
     # ---------------------------
     # Write picked points to file
@@ -233,7 +238,7 @@ def fk(stream, dimension='x',colormap='gray', output='points.csv'):
             outfile.writerow(px)
             outfile.writerow(py)
 
-    return stream_fft, dimension, fig
+    return fig, ax, stream_fft, dimension
 
 def removeDelay(stream):
     '''
@@ -247,7 +252,7 @@ def removeDelay(stream):
         print 'Header time delay value invalid. '
     return stream
 
-def fkfilter(stream, spread=3, dimension='x',colormap='seismic',output='points.csv'):
+def fkfilter(stream, spread=3, dimension='x',colormap='seismic',output='points.csv',show=True):
     '''
     Creates frequency-wavenumber filter of stream data produced by PLACE. 
     Parameters:
@@ -261,7 +266,7 @@ def fkfilter(stream, spread=3, dimension='x',colormap='seismic',output='points.c
          Press 'enter' when satisfied with the location of the velocity points.  
     Next, the FK filter will be displayed. 
     When FK filter figure is closed, the filtered data is displayed.
-    Both the filtered stream and the filter (H) is returned.
+    The filtered data figure and axes (to manipulate figure), filtered stream, and the filter (H) is returned.
     '''
 
     global px, py, ax
@@ -343,9 +348,9 @@ def fkfilter(stream, spread=3, dimension='x',colormap='seismic',output='points.c
         filtered_stream.append(trace)
         
     # show filtered data
-    contour(filtered_stream,colormap=colormap)
+    fig, ax = contour(filtered_stream,colormap=colormap, show=show)
 
-    return filtered_stream, H
+    return fig, ax, filtered_stream, H
 
 def picker(event):
     ''' 
