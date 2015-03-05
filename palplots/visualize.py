@@ -111,6 +111,8 @@ def wiggle(stream, dimension='x', dx = 1, percent=100, output='points.csv'):
             outfile.writerow(px)
             outfile.writerow(py)
 
+    return fig
+
 def contour(stream, dimension='x',output='points.csv', colormap='seismic'):
     '''
     Creates 2D image of stream data produced by PLACE.  
@@ -165,6 +167,8 @@ def contour(stream, dimension='x',output='points.csv', colormap='seismic'):
             outfile = csv.writer(csvfile, delimiter=',')
             outfile.writerow(px)
             outfile.writerow(py)
+    
+    return fig
 
 def fk(stream, dimension='x',colormap='gray', output='points.csv'):
     '''
@@ -229,7 +233,7 @@ def fk(stream, dimension='x',colormap='gray', output='points.csv'):
             outfile.writerow(px)
             outfile.writerow(py)
 
-    return stream_fft, dimension
+    return stream_fft, dimension, fig
 
 def removeDelay(stream):
     '''
