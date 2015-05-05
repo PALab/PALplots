@@ -17,7 +17,7 @@ Example usage:
 quickread -n S8-rotd-postreaction --axis theta --plot wiggle
 '''
 
-from palplots.visualize import contour, wiggle
+from palplots.visualize import Plot
 from obspy.core import read
 import getopt
 import sys
@@ -51,9 +51,9 @@ def main():
 
     # plot
     if plot == 'contour':
-        contour(stream,dimension=dimension)
+        Plot().contour(stream,dimension=dimension)
     elif plot == 'wiggle':
-        wiggle(stream,dimension=dimension)
+        Plot().wiggle(stream,dimension=dimension)
     else:
         print 'invalid plot choice'
 
