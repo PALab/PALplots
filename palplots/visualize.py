@@ -45,16 +45,12 @@ class Plot(object):
 
         newstream = stream.copy() # create copy of stream to manipulate
         percent/=100.
-
+        newstream.sort(keys=['%s_position'%dimension])
         # ----------
         # Setup plot
         # ----------
-        if dimension == 'x':
-            newstream.sort(keys=['x_position'])
-            inc = newstream[1].stats.x_position - newstream[0].stats.x_position # spacing between x-position
-        elif dimension == 'theta':
-            newstream.sort(keys=['theta_position'])
-            inc = newstream[1].stats.theta_position - newstream[0].stats.theta_position # spacing between angles (theta)
+            
+        inc = newstream[1].stats['%s_position'%dimension] - newstream[0].stats['%s_position'%dimension] # spacing between x-position
 
         times = np.arange(0,newstream[0].stats.npts*newstream[0].stats.delta, newstream[0].stats.delta)*1e6
 
@@ -62,39 +58,22 @@ class Plot(object):
         # Plot
         # ----
         for trace in newstream: 
-
             # Format trace for wiggle plot
             trace.data = np.clip(trace.data,-max(trace.data)*percent,max(trace.data)*percent)# clip data by specified percent of maximum amplitude
             trace.normalize()
             trace.data*=inc
-            if dimension == 'x':
+            
+            trace.data = trace.data + trace.stats['%s_position'%dimension] # arrange to plot vs position
+            self.ax.plot(trace.data, times, color='black',picker=True) # plot traces
 
-                trace.data = trace.data + trace.stats.x_position # arrange to plot vs position
-                self.ax.plot(trace.data, times, color='black',picker=True) # plot traces
+            # Fill under positive peaks
+            if newstream[1].stats['%s_position'%dimension] > newstream[0].stats['%s_position'%dimension]:
+                self.ax.fill_betweenx(times,trace.data, trace.stats['%s_position'%dimension], where=trace.data>trace.stats['%s_position'%dimension],color='black')
+            elif newstream[1].stats['%s_position'%dimension] < newstream[0].stats['%s_position'%dimension]:
+                self.ax.fill_betweenx(times,trace.data, trace.stats['%s_position'%dimension], where=trace.data<trace.stats['%s_position'%dimension],color='black')
 
-                # Fill under positive peaks
-                if newstream[1].stats.x_position > newstream[0].stats.x_position:
-                    self.ax.fill_betweenx(times,trace.data, trace.stats.x_position, where=trace.data>trace.stats.x_position,color='black')
-                elif newstream[1].stats.x_position < newstream[0].stats.x_position:
-                    self.ax.fill_betweenx(times,trace.data, trace.stats.x_position, where=trace.data<trace.stats.x_position,color='black')
-
-                plt.xlim((newstream[0].stats.x_position-inc,newstream[len(newstream)-1].stats.x_position+inc))
-                plt.xlabel('Position ('+str(trace.stats.x_unit)+')')
-
-            elif dimension == 'theta':
-
-                trace.data = trace.data + trace.stats.theta_position # arrange to plot vs position
-                self.ax.plot(trace.data, times, color='black',picker=True) # plot traces
-
-                # Fill under positive peaks
-                if newstream[1].stats.theta_position > newstream[0].stats.theta_position:
-                    self.ax.fill_betweenx(times,trace.data, trace.stats.theta_position, where=trace.data>trace.stats.theta_position,color='black')
-                elif newstream[1].stats.theta_position < newstream[0].stats.theta_position:
-                    self.ax.fill_betweenx(times,trace.data, trace.stats.theta_position, where=trace.data<trace.stats.theta_position,color='black')
-
-                plt.xlim((newstream[0].stats.theta_position-inc,newstream[len(newstream)-1].stats.theta_position+inc))
-
-                plt.xlabel('Position('+str(trace.stats.theta_unit)+')')
+            plt.xlim((newstream[0].stats['%s_position'%dimension]-inc,newstream[len(newstream)-1].stats['%s_position'%dimension]+inc))
+            plt.xlabel('Position (%s)'%trace.stats['%s_unit'%dimension])
 
         plt.ylim((trace.stats.npts*trace.stats.delta*1e6,0))
         plt.ylabel('Time ($\mu$s)')
@@ -124,17 +103,11 @@ class Plot(object):
         Returns figure, axes, and colorbar.
         '''
 
-        if dimension == 'x':
-            stream.sort(keys=['x_position'])
-            array = np.rot90(np.array(stream),1)
-            plt.imshow(array,extent=[stream[0].stats.x_position,stream[len(stream)-1].stats.x_position,0,stream[0].stats.npts*stream[0].stats.delta*1e6],aspect='auto',cmap=colormap,picker=True)
-            plt.xlabel('Scan Location ('+stream[0].stats.x_unit+')')
-
-        elif dimension == 'theta':
-            stream.sort(keys=['theta_position'])
-            array = np.rot90(np.array(stream),1)
-            plt.imshow(array,extent=[stream[0].stats.theta_position,stream[len(stream)-1].stats.theta_position,0,stream[0].stats.npts*stream[0].stats.delta*1e6],aspect='auto',cmap=colormap,picker=True)
-            plt.xlabel('Scan Location ('+stream[0].stats.theta_unit+')')
+       
+        stream.sort(keys=['%s_position'%dimension])
+        array = np.rot90(np.array(stream),1)
+        plt.imshow(array,extent=[stream[0].stats['%s_position'%dimension],stream[len(stream)-1].stats['%s_position'%dimension],0,stream[0].stats.npts*stream[0].stats.delta*1e6],aspect='auto',cmap=colormap,picker=True)
+        plt.xlabel('Scan Location (%s)'%stream[0].stats['%s_unit'%dimension])
 
         self.ax.autoscale(False)
         plt.gca().invert_yaxis()
@@ -174,13 +147,10 @@ class Plot(object):
         # ---------------------
         # Setup data/parameters
         # ---------------------
-        if dimension == 'x':
-            stream.sort(keys=['x_position'])
-            dx = stream[1].stats.x_position-stream[0].stats.x_position
-        elif dimension == 'theta':
-            stream.sort(keys=['theta_position'])
-            dx = stream[1].stats.theta_position-stream[0].stats.theta_position
-            print 'NOTICE: Spatial frequency here is 1/deg'
+
+        stream.sort(keys=['%s_position'%dimension])
+        dx = stream[1].stats['%s_position'%dimension]-stream[0].stats['%s_position'%dimension]
+       
         nx = len(stream)
         nt = stream[0].stats.npts
         nk = 2*nx
@@ -201,10 +171,8 @@ class Plot(object):
         self.ax.autoscale(False)
         plt.ylim((0,1e-6/(2*dt)))
         plt.ylabel('Frequency (MHz)')
-        if dimension == 'x':
-            plt.xlabel('Spatial Frequency (1/'+str(stream[0].stats.x_unit)+')')
-        if dimension == 'theta':
-            plt.xlabel('Spatial Frequency (1/'+str(stream[0].stats.theta_unit)+')')
+        
+        plt.xlabel('Spatial Frequency (1/%s)'%stream[0].stats['%s_unit'%dimension])
         self.fig.canvas.mpl_connect('button_press_event', self.pickV) # pick/remove points
         if show == True:
             plt.show()
@@ -257,10 +225,9 @@ class Plot(object):
         nt = stream[0].stats.npts
         nk = 2*nx
         nf = 2*nt
-        if dimension == 'x':
-            dx = stream[1].stats.x_position-stream[0].stats.x_position
-        elif dimension == 'theta':
-            dx = stream[1].stats.theta_position-stream[0].stats.theta_position
+        
+        dx = stream[1].stats['%s_position'%dimension]-stream[0].stats['%s_position'%dimension]
+        
         dt = stream[0].stats.delta
 
         if (self.py[0]/self.px[0]) > (self.py[1]/self.px[1]):
