@@ -31,7 +31,7 @@ class Plot(object):
         self.py = [] #array of picked y-values
         self.fig, self.ax = plt.subplots()
 
-    def wiggle(self, stream, dimension='x', dx = 1, percent=100, output='points.csv',show=True):
+    def wiggle(self, stream, dimension='x', dx = 1, percent=100, output='points.csv',fill=True,savefig=False,show=True):
         '''
         Creates plot of traces ("wiggles") vs. x-position from an ObsPy stream produced by PLACE.  
         The positive peaks of each wiggle are filled.
@@ -40,6 +40,9 @@ class Plot(object):
              dx : spacing between wiggles.  For example, dx = 10 will plot every tenth trace 
              percent : percent of maximum amplitude for each trace.  A value of 100 plots the full amplitude of the (normalized) traces, a value of 50 clips data with an amplitude greater than 50% of the maximum amplitude in the trace. 
              output : name of file to save 'picked' points to. Saves by default to 'points.csv'
+             fill : if True (default), will fill under the positive peaks in black.
+             savefig: string argument for filename to save figure as (e.g. savefig='myfigure.png'.  If savefig=False (default), no figure is saved. NOTE: this saves the general wiggle plot.  Changes to the plot can be made using show=False and manipulating the axes, and then plt.savefig() can be called directly in the script.
+             show : if True (default), the plot will be shown automatically.  If False, the plot can be manipulated with the returned self.fig and self.ax.  Then, plt.show() can be called in the script to show the final figure.
         Returns fig and ax to manipulate plot.
         '''
 
@@ -67,10 +70,11 @@ class Plot(object):
             self.ax.plot(trace.data, times, color='black',picker=True) # plot traces
 
             # Fill under positive peaks
-            if newstream[1].stats['%s_position'%dimension] > newstream[0].stats['%s_position'%dimension]:
-                self.ax.fill_betweenx(times,trace.data, trace.stats['%s_position'%dimension], where=trace.data>trace.stats['%s_position'%dimension],color='black')
-            elif newstream[1].stats['%s_position'%dimension] < newstream[0].stats['%s_position'%dimension]:
-                self.ax.fill_betweenx(times,trace.data, trace.stats['%s_position'%dimension], where=trace.data<trace.stats['%s_position'%dimension],color='black')
+            if fill == True:
+                if newstream[1].stats['%s_position'%dimension] > newstream[0].stats['%s_position'%dimension]:
+                    self.ax.fill_betweenx(times,trace.data, trace.stats['%s_position'%dimension], where=trace.data>trace.stats['%s_position'%dimension],color='black')
+                elif newstream[1].stats['%s_position'%dimension] < newstream[0].stats['%s_position'%dimension]:
+                    self.ax.fill_betweenx(times,trace.data, trace.stats['%s_position'%dimension], where=trace.data<trace.stats['%s_position'%dimension],color='black')
 
             plt.xlim((newstream[0].stats['%s_position'%dimension]-inc,newstream[len(newstream)-1].stats['%s_position'%dimension]+inc))
             plt.xlabel('Position (%s)'%trace.stats['%s_unit'%dimension])
@@ -79,6 +83,10 @@ class Plot(object):
         plt.ylabel('Time ($\mu$s)')
 
         self.fig.canvas.mpl_connect('button_press_event', self.picker) # select/remove point
+
+        if savefig != False:
+            plt.savefig(savefig)
+
         if show == True:
             plt.show()
 
@@ -93,13 +101,15 @@ class Plot(object):
 
         return self.fig, self.ax
 
-    def contour(self, stream, dimension='x',output='points.csv', colormap='seismic',show=True):
+    def contour(self, stream, dimension='x',output='points.csv', colormap='seismic',savefig=False,show=True):
         '''
         Creates 2D image of stream data produced by PLACE.  
         Parameters: 
              stream : ObsPy stream created with custom header information by PLACE.  Required header information: delta, npts, position, position_unit
              colormap : choose colorscheme to display data (e.g. 'jet', 'gray', 'seismic')
              output : name of file to save 'picked' points to. Saves by default to 'points.csv'
+             savefig: string argument for filename to save figure as (e.g. savefig='myfigure.png'.  If savefig=False (default), no figure is saved. NOTE: this saves the general wiggle plot.  Changes to the plot can be made using show=False and manipulating the axes, and then plt.savefig() can be called directly in the script.
+             show : if True (default), the plot will be shown automatically.  If False, the plot can be manipulated with the returned self.fig, self.ax, and cbar.  Then, plt.show() can be called in the script to show the final figure.
         Returns figure, axes, and colorbar.
         '''
 
@@ -118,7 +128,12 @@ class Plot(object):
             cbar.set_label('Particle Velocity (mm/s)')
 
         plt.ylabel('Time ($\mu$s)')
+     
         self.fig.canvas.mpl_connect('button_press_event', self.picker) # pick point
+        
+        if savefig != False:
+            plt.savefig(savefig)
+        
         if show == True:
             plt.show()
 
@@ -133,12 +148,14 @@ class Plot(object):
 
         return self.fig, self.ax, cbar
 
-    def fk(self, stream, dimension='x',colormap='gray', output='points.csv',show=True):
+    def fk(self, stream, dimension='x',colormap='gray', output='points.csv',savefig=False,show=True):
         '''
         Plots frequency-wavenumber spectrum for stream recorded by PLACE Scan.py.
         Parameters:
              stream : ObsPy stream created with custom header information defined by Scan.py.  Required header information: delta, npts, position.
              output : filename that selected velocity points are saved to.
+             savefig: string argument for filename to save figure as (e.g. savefig='myfigure.png'.  If savefig=False (default), no figure is saved. NOTE: this saves the general wiggle plot.  Changes to the plot can be made using show=False and manipulating the axes, and then plt.savefig() can be called directly in the script.
+             show : if True (default), the plot will be shown automatically.  If False, the plot can be manipulated with the returned self.fig, self.ax, and cbar.  Then, plt.show() can be called in the script to show the final figure.
         Use left-click to select points.  Each point defines a line with the origin with a slope corresponding to an apparent velocity.  This velocity is displayed when point is chosen.
         To remove a point, right click.
         Returns figure and axes (to manipulate plots), FFT data and spatial dimension used ('x' or 'theta')
@@ -171,9 +188,13 @@ class Plot(object):
         self.ax.autoscale(False)
         plt.ylim((0,1e-6/(2*dt)))
         plt.ylabel('Frequency (MHz)')
-        
         plt.xlabel('Spatial Frequency (1/%s)'%stream[0].stats['%s_unit'%dimension])
+        
         self.fig.canvas.mpl_connect('button_press_event', self.pickV) # pick/remove points
+           
+        if savefig != False:
+            plt.savefig(savefig)
+        
         if show == True:
             plt.show()
 
