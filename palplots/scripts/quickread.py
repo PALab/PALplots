@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+
+from __future__ import print_function
 '''
 Quick-read function for data acquired with PLACE.  
 
@@ -25,14 +27,14 @@ import sys
 def main():
     try: 
         opts, args = getopt.getopt(sys.argv[1:],'h:n:a:p',['help','name=','axis=','plot='])
-    except getopt.error, msg:
-        print msg
-        print 'for help use --help'
+    except getopt.error as msg:
+        print(msg)
+        print('for help use --help')
         sys.exit(2)
 
     for o, a in opts:
         if o in ('-h','--help'):
-            print __doc__
+            print(__doc__)
             sys.exit()
         if o in ('-n','--name'):
             filename = str(a)
@@ -55,7 +57,7 @@ def main():
     elif plot == 'wiggle':
         Plot().wiggle(stream,dimension=dimension)
     else:
-        print 'invalid plot choice'
+        print('invalid plot choice')
 
 if __name__ == '__main__':
     main()
