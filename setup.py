@@ -1,6 +1,10 @@
+from warnings import warn
 try:
     from setuptools import setup
 except ImportError:
+    msg = 'distutils module can cause errors during installation.'
+    msg += 'Installing setuptools is recommened prior to installation of PALplots.'
+    warn(msg, ImportWarning)
     from distutils.core import setup
 
 setup(
@@ -16,6 +20,4 @@ setup(
     install_requires=['numpy>1.0.0', 'obspy','scipy', 'matplotlib', 'h5py', 'obspyh5'],
     entry_points={'console_scripts':['quickread = palplots.scripts.quickread:main',],},
     )
-
-
 

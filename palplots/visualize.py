@@ -1,3 +1,4 @@
+from __future__ import print_function
 import numpy as np
 import numpy.fft as fft
 import matplotlib.pyplot as plt
@@ -218,7 +219,7 @@ class Plot(object):
                 trim_i = trace.stats.time_delay*1e-6/trace.stats.delta
                 trace.data = trace.data[trim_i:]
         else:
-            print 'Header time delay value invalid. '
+            print('Header time delay value invalid. ')
         return stream
 
     def fkfilter(self, stream, spread=3, dimension='x',colormap='seismic',output='points.csv',show=True):
@@ -375,10 +376,10 @@ class Plot(object):
 
         if event.key == 'enter':
             if len(self.px) > 2:
-                print 'Too many points chosen, choose only two velocity values'
+                print('Too many points chosen, choose only two velocity values')
             elif len(self.px) < 2:
-                print 'Choose more points! At least two velocity points are needed'
+                print('Choose more points! At least two velocity points are needed')
             else:
                 for i in range(len(self.px)):
-                    print 'velocity ' + str(i+1) + ': ' + str(int((self.py[i]/self.px[i])*1e3)) + ' m/s'
+                    print('velocity ' + str(i+1) + ': ' + str(int((self.py[i]/self.px[i])*1e3)) + ' m/s')
                     plt.close()
