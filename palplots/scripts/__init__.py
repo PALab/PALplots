@@ -1,3 +1,3 @@
-import quickread
+from .quickread import *
 
-__all__=['scripts']
+__all__ = ['quickread']
