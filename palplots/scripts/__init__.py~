@@ -1,3 +1,0 @@
-import quickread
-
-__all__=['automate']
