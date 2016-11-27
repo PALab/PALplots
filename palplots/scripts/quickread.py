@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-from __future__ import print_function
 '''
 Quick-read function for data acquired with PLACE.  
 
@@ -19,7 +17,8 @@ Example usage:
 quickread -n S8-rotd-postreaction --axis theta --plot wiggle
 '''
 
-from palplots.visualize import Plot
+from __future__ import print_function
+from .. import Plot
 from obspy.core import read
 import getopt
 import sys

@@ -1,4 +1,4 @@
-import visualize
-import scripts 
+from .visualize import *
+from .scripts import *
 
-__all__=['palplots']
+__all__ = ['visualize','scripts']
