@@ -2,7 +2,7 @@ from obspy.core import read
 from palplots.visualize import Plot
 import matplotlib.pyplot as plt
 
-stream = read('S8-rotd-postreaction.h5','H5',apply_calib=True)
+stream = read('https://ndownloader.figshare.com/files/6994493','H5',apply_calib=True)
 
 # -----------
 # wiggle plot
